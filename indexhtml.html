@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPS ONLINE SHOPPING | Advanced Buyer & Seller Marketplace</title>
+    <!-- Tailwind CSS for sleek, scannable modern design -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- FontAwesome for professional UI Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 custom-scrollbar">
+
+    <!-- GLOBAL NOTIFICATION TOAST -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMessage">Action successful!</span>
+    </div>
+
+    <!-- MAIN HEADER & NAVIGATION -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('buyer-tab')">
+                <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-md shadow-indigo-100">
+                    <i class="fa-solid fa-bag-shopping text-xl"></i>
+                </div>
+                <span class="text-2xl font-black tracking-tight bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">SPS ONLINE SHOPPING</span>
+            </div>
+
+            <!-- Global Portal Switcher -->
+            <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <button id="nav-buyer" onclick="switchTab('buyer-tab')" class="px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-white text-indigo-600 shadow-xs">
+                    <i class="fa-solid fa-shop mr-2"></i>Buyer Storefront
+                </button>
+                <button id="nav-seller" onclick="openSellerAuthModal()" class="px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 text-slate-600 hover:text-slate-900">
+                    <i class="fa-solid fa-lock mr-2"></i>Seller Portal
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN PORTAL WRAPPER -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- ========================================== -->
+        <!-- 1. BUYER PORTAL                            -->
+        <!-- ========================================== -->
+        <section id="buyer-tab" class="portal-section active-section space-y-8">
+            <!-- Hero Banner -->
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-700 rounded-2xl p-8 md:p-12 text-white shadow-xl relative overflow-hidden">
+                <div class="relative z-10 max-w-xl">
+                    <span class="bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Premium Experience</span>
+                    <h1 class="text-3xl md:text-5xl font-black tracking-tight mt-4 mb-2">Explore Premium Products</h1>
+                    <p class="text-indigo-100 text-sm md:text-base mb-6">Enjoy secure Cash on Delivery (COD) and inspect products closely from every single angle.</p>
+                </div>
+                <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-10 translate-y-10 pointer-events-none">
+                    <i class="fa-solid fa-basket-shopping text-[240px]"></i>
+                </div>
+            </div>
+
+            <!-- Product Showcase Grid -->
+            <div>
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold tracking-tight text-slate-900">Featured Collections</h2>
+                    <span id="product-count" class="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">Showing 2 items</span>
+                </div>
+                <div id="buyer-product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Dynamic Javascript Injection -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- 2. SELLER PORTAL (SECURED VIEW)            -->
+        <!-- ========================================== -->
+        <section id="seller-tab" class="portal-section hidden space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 tracking-tight">Seller Dashboard</h1>
+                    <p class="text-slate-500 text-sm">Secure Merchant Account Portal</p>
+                </div>
+                <button onclick="logoutSeller()" class="self-start md:self-auto bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 font-medium px-4 py-2 rounded-xl border border-slate-200 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Lock Portal
+                </button>
+            </div>
+
+            <!-- Seller Tools & Analytics -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Add Product Form Panel -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs h-fit">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-plus text-indigo-600"></i> Upload New Product
+                    </h3>
+                    <form id="productForm" onsubmit="handleProductUpload(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Product Title</label>
+                            <input type="text" id="pTitle" required placeholder="e.g. Ergonomic Gaming Chair" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500 text-sm">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Price (Rs.)</label>
+                                <input type="number" id="pPrice" required placeholder="5500" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500 text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Category</label>
+                                <input type="text" id="pCategory" required placeholder="Electronics" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500 text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Description</label>
+                            <textarea id="pDesc" rows="3" required placeholder="Describe full technical and material specifics..." class="w-full border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500 text-sm"></textarea>
+                        </div>
+                        
+                        <!-- 4-Angle File Upload Section -->
+                        <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-dashed border-slate-200">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600"><i class="fa-solid fa-camera mr-1"></i> Multi-Angle Images (File Upload)</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                                    <span class="text-[10px] text-slate-400 block mb-1">Front Perspective</span>
+                                    <input type="file" id="imgFront" accept="image/*" required class="text-xs w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-600 cursor-pointer">
+                                </div>
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                                    <span class="text-[10px] text-slate-400 block mb-1">Back Perspective</span>
+                                    <input type="file" id="imgBack" accept="image/*" required class="text-xs w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-600 cursor-pointer">
+                                </div>
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                                    <span class="text-[10px] text-slate-400 block mb-1">Left Profile</span>
+                                    <input type="file" id="imgLeft" accept="image/*" required class="text-xs w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-600 cursor-pointer">
+                                </div>
+                                <div class="bg-white p-2 rounded-lg border border-slate-200 text-center">
+                                    <span class="text-[10px] text-slate-400 block mb-1">Right Profile</span>
+                                    <input type="file" id="imgRight" accept="image/*" required class="text-xs w-full text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-600 cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl transition-all duration-150 shadow-md shadow-indigo-100 text-sm">
+                            Publish to Live Store
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Live Order Tracking Pipeline Terminal -->
+                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs md:col-span-2 flex flex-col h-[580px]">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-truck-ramp-box text-indigo-600"></i> Live Order Tracking Pipeline
+                        </h3>
+                        <p class="text-slate-400 text-xs">Manage updates, processing, and buyer shipping destinations</p>
+                    </div>
+                    <div id="seller-order-container" class="space-y-4 overflow-y-auto flex-1 pr-2 custom-scrollbar">
+                        <!-- Dynamic Injection -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- 3. LIVE CHAT ENGINE COMPONENT             -->
+    <!-- ========================================== -->
+    <div id="live-chat-anchor" class="fixed bottom-6 right-6 z-40 flex flex-col items-end">
+        <!-- Floating Chat Initiation Button -->
+        <button onclick="toggleChatInterface()" class="bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-2xl transition-all duration-200 flex items-center justify-center relative group">
+            <i class="fa-solid fa-comments text-2xl"></i>
+            <span class="absolute right-14 bg-slate-900 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Live Help Desk Matrix</span>
+        </button>
+
+        <!-- Dynamic Chat Windows Terminal -->
+        <div id="chat-window" class="hidden bg-white border border-slate-200 w-80 md:w-96 h-[480px] rounded-2xl shadow-2xl flex-col overflow-hidden mt-3 border border-slate-100 animate-in fade-in slide-in-from-bottom-4 duration-200">
+            <!-- Chat Window Header -->
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-600 text-white p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                    <div>
+                        <h4 class="font-bold text-sm tracking-wide">Live Support Matrix</h4>
+                        <span id="chat-role-indicator" class="text-[11px] opacity-80">Connected Portal Channel</span>
+                    </div>
+                </div>
+                <button onclick="toggleChatInterface()" class="text-white/80 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <!-- Messages Frame -->
+            <div id="chat-messages-container" class="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-50 text-xs custom-scrollbar">
+                <!-- Message Elements -->
+            </div>
+            <!-- Chat Control Console -->
+            <form onsubmit="broadcastMessage(event)" class="p-3 bg-white border-t border-slate-100 flex gap-2">
+                <input type="text" id="chatInputField" required placeholder="Type a message to peer portal..." class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-indigo-500">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 rounded-xl text-xs font-medium transition-colors"><i class="fa-solid fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. SECURE SELLER GATEWAY MODAL             -->
+    <!-- ========================================== -->
+    <div id="seller-auth-modal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs hidden items-center justify-center p-4">
+        <div class="bg-white border border-slate-100 rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center space-y-4 transform scale-95 opacity-0 transition-all duration-200" id="auth-card">
+            <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto text-xl shadow-inner">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-slate-900">Protected Gateway</h3>
+                <p class="text-slate-400 text-xs mt-1">Authorized security credentials required</p>
+            </div>
+            <div class="text-left bg-amber-50 border border-amber-200 p-2.5 rounded-xl flex items-start gap-2.5 text-[11px] text-amber-800">
+                <i class="fa-solid fa-circle-info mt-0.5 text-amber-600"></i>
+                <span>Use default access credentials:<br><strong>Password: 00000</strong></span>
+            </div>
+            <div class="space-y-3">
+                <input type="password" id="sellerPassInput" placeholder="Enter Security Password" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-center focus:outline-none focus:border-indigo-500 text-sm">
+                <div class="flex gap-2">
+                    <button onclick="closeSellerAuthModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl transition-colors text-sm">Abort</button>
+                    <button onclick="verifySellerAuthentication()" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition-colors text-sm">Authenticate</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 5. INTERACTIVE PRODUCT HIGHLIGHT MODAL     -->
+    <!-- ========================================== -->
+    <div id="product-detail-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white border border-slate-100 rounded-3xl max-w-4xl w-full p-6 md:p-8 shadow-2xl relative grid grid-cols-1 md:grid-cols-2 gap-8 transform scale-95 opacity-0 transition-all duration-200" id="detail-card">
+            <button onclick="closeProductDetailModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 p-2 rounded-full transition-colors z-10"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <!-- Complete Multi-Angle Gallery Viewer Workspace -->
+            <div class="space-y-4">
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden h-80 md:h-96 flex items-center justify-center relative group p-4">
+                    <img id="modal-main-viewer" src="" alt="Dynamic Angle View" class="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105">
+                    <span id="angle-badge" class="absolute bottom-3 left-3 bg-slate-900/80 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md backdrop-blur-xs">Front View</span>
+                </div>
+                <!-- Precision Angle Selector Strip -->
+                <div class="grid grid-cols-4 gap-2">
+                    <button onclick="updateModalViewerAngle('front')" class="angle-btn border-2 border-indigo-600 bg-slate-50 rounded-xl p-2 h-20 flex items-center justify-center overflow-hidden"><img id="thumb-front" src="" class="max-h-full object-contain"></button>
+                    <button onclick="updateModalViewerAngle('back')" class="angle-btn border border-slate-200 bg-slate-50 rounded-xl p-2 h-20 flex items-center justify-center overflow-hidden"><img id="thumb-back" src="" class="max-h-full object-contain"></button>
+                    <button onclick="updateModalViewerAngle('left')" class="angle-btn border border-slate-200 bg-slate-50 rounded-xl p-2 h-20 flex items-center justify-center overflow-hidden"><img id="thumb-left" src="" class="max-h-full object-contain"></button>
+                    <button onclick="updateModalViewerAngle('right')" class="angle-btn border border-slate-200 bg-slate-50 rounded-xl p-2 h-20 flex items-center justify-center overflow-hidden"><img id="thumb-right" src="" class="max-h-full object-contain"></button>
+                </div>
+            </div>
+
+            <!-- Transaction Checkout Details Matrix -->
+            <div class="flex flex-col justify-between space-y-6">
+                <div class="space-y-3">
+                    <span id="modal-pCategory" class="text-xs font-bold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">Category</span>
+                    <h2 id="modal-pTitle" class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Product Title</h2>
+                    <div id="modal-pPrice" class="text-2xl font-black text-slate-900">Rs. 0</div>
+                    <hr class="border-slate-100">
+                    <p id="modal-pDesc" class="text-slate-500 text-sm leading-relaxed max-h-32 overflow-y-auto custom-scrollbar pr-1">Comprehensive structural and core utility breakdown...</p>
+                </div>
+
+                <!-- Structured Secure Checkout Block via COD -->
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-3">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700"><i class="fa-solid fa-truck text-indigo-600 mr-1"></i> Fast Cash on Delivery (COD) Checkout</h4>
+                    <form id="checkoutForm" onsubmit="processProductOrder(event)" class="space-y-2">
+                        <input type="text" id="custName" required placeholder="Full Name" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+                        <input type="tel" id="custPhone" required placeholder="Phone Number" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+                        <input type="text" id="custAddress" required placeholder="Complete Shipping Destination Address" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition-colors text-xs flex items-center justify-center gap-2 mt-2 shadow-lg shadow-emerald-50">
+                            Confirm Order (COD)
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT ARCHITECTURE ENGINE             -->
+    <!-- ========================================== -->
+    <script>
+        // GLOBAL DATA STORES
+        let currentPortalMode = 'buyer'; 
+        let isSellerAuthenticated = false;
+        let productsDatabase = [];
+        let ordersDatabase = [];
+        let currentlySelectedProduct = null;
+
+        // INJECTION TEMPLATES FOR SYSTEM INITIALIZATION (Preloaded with high-fidelity Base64 Assets)
+        const placeholderImages = {
+            front: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='100%' height='100%' fill='%23f8fafc'/><text x='50%' y='50%' font-family='sans-serif' font-weight='bold' font-size='16' fill='%2364748b' text-anchor='middle'>Front Perspective</text></svg>",
+            back: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='100%' height='100%' fill='%23f1f5f9'/><text x='50%' y='50%' font-family='sans-serif' font-weight='bold' font-size='16' fill='%2364748b' text-anchor='middle'>Back Perspective</text></svg>",
+            left: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='100%' height='100%' fill='%23f8fafc'/><text x='50%' y='50%' font-family='sans-serif' font-weight='bold' font-size='16' fill='%2364748b' text-anchor='middle'>Left Profile</text></svg>",
+            right: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'><rect width='100%' height='100%' fill='%23f1f5f9'/><text x='50%' y='50%' font-family='sans-serif' font-weight='bold' font-size='16' fill='%2364748b' text-anchor='middle'>Right Profile</text></svg>"
+        };
+
+        // INITIAL DEPLOYMENT DATA PIPELINE
+        window.addEventListener('DOMContentLoaded', () => {
+            productsDatabase = [
+                
+                
+
+        
+            ];
+
+            refreshStorefrontGrid();
+            refreshSellerPipeline();
+            initializeChatLogs();
+        });
+
+        // SYSTEM TOAST NOTIFICATION ENGINE
+        function invokeToastAlert(msg, variant = 'success') {
+            const el = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            document.getElementById('toastMessage').innerText = msg;
+            
+            if (variant === 'success') {
+                el.className = el.className.replace('bg-rose-600', 'bg-slate-900');
+                icon.className = "fa-solid fa-circle-check text-emerald-400";
+            } else {
+                el.className = el.className.replace('bg-slate-900', 'bg-rose-600');
+                icon.className = "fa-solid fa-circle-exclamation text-white";
+            }
+            
+            el.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => el.classList.add('translate-y-20', 'opacity-0'), 3500);
+        }
+
+        // TAB SWITCHING CONTROLLER
+        function switchTab(targetTabId) {
+            document.querySelectorAll('.portal-section').forEach(section => section.classList.add('hidden'));
+            document.getElementById(targetTabId).classList.remove('hidden');
+            
+            const nBuyer = document.getElementById('nav-buyer');
+            const nSeller = document.getElementById('nav-seller');
+
+            if (targetTabId === 'buyer-tab') {
+                currentPortalMode = 'buyer';
+                nBuyer.className = "px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-white text-indigo-600 shadow-xs";
+                nSeller.className = "px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 text-slate-600 hover:text-slate-900";
+                document.getElementById('chat-role-indicator').innerText = "Buyer Terminal Session";
+            } else {
+                currentPortalMode = 'seller';
+                nSeller.className = "px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 bg-white text-indigo-600 shadow-xs";
+                nBuyer.className = "px-5 py-2 rounded-lg font-medium text-sm transition-all duration-200 text-slate-600 hover:text-slate-900";
+                document.getElementById('chat-role-indicator').innerText = "Secure Merchant Terminal";
+            }
+            initializeChatLogs();
+        }
+
+        // SECURITY VALIDATION CONTROLLER
+        function openSellerAuthModal() {
+            if (isSellerAuthenticated) {
+                switchTab('seller-tab');
+                return;
+            }
+            const modal = document.getElementById('seller-auth-modal');
+            const card = document.getElementById('auth-card');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => card.classList.remove('scale-95', 'opacity-0'), 10);
+        }
+
+        function closeSellerAuthModal() {
+            const modal = document.getElementById('seller-auth-modal');
+            const card = document.getElementById('auth-card');
+            card.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 200);
+            document.getElementById('sellerPassInput').value = '';
+        }
+
+        function verifySellerAuthentication() {
+            const input = document.getElementById('sellerPassInput').value;
+            if (input === 'Saroj123') {
+                isSellerAuthenticated = true;
+                closeSellerAuthModal();
+                switchTab('seller-tab');
+                invokeToastAlert("Security Token Verified. Session active.");
+            } else {
+                invokeToastAlert("Access Denied. Invalid Authorization Code.", "error");
+            }
+        }
+
+        function logoutSeller() {
+            isSellerAuthenticated = false;
+            switchTab('buyer-tab');
+            invokeToastAlert("Secure session invalidated.");
+        }
+
+        // STOREFRONT VIEW RENDERING MATRIX
+        function refreshStorefrontGrid() {
+            const container = document.getElementById('buyer-product-grid');
+            document.getElementById('product-count').innerText = `Showing ${productsDatabase.length} items`;
+            container.innerHTML = '';
+
+            productsDatabase.forEach(product => {
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-200 group flex flex-col justify-between";
+                card.innerHTML = `
+                    <div class="cursor-pointer overflow-hidden bg-slate-50 relative aspect-square flex items-center justify-center p-4 border-b border-slate-100" onclick="launchProductDetailView(${product.id})">
+                        <img src="${product.images.front}" alt="${product.title}" class="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span class="bg-white text-slate-900 font-bold text-xs px-4 py-2 rounded-xl shadow-xl flex items-center gap-1"><i class="fa-solid fa-magnifying-glass-plus"></i> Multi-Angle View</span>
+                        </div>
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                        <div class="space-y-1">
+                            <span class="text-[10px] font-bold text-indigo-600 tracking-wider uppercase bg-indigo-50 px-2 py-0.5 rounded-sm">${product.category}</span>
+                            <h3 class="font-bold text-slate-900 text-base line-clamp-1 group-hover:text-indigo-600 transition-colors">${product.title}</h3>
+                            <p class="text-xs text-slate-400 line-clamp-2">${product.desc}</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-2">
+                            <span class="text-lg font-black text-slate-900">Rs. ${product.price.toLocaleString()}</span>
+                            <button onclick="launchProductDetailView(${product.id})" class="bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white px-3.5 py-2 rounded-xl text-xs font-bold transition-all duration-150">
+                                Buy / Inspect
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // PERSISTENT MULTI-ANGLE DATA UPLOAD SYSTEM (Converts files into standalone Base64 assets)
+        function handleProductUpload(e) {
+            e.preventDefault();
+            
+            const fileFront = document.getElementById('imgFront').files[0];
+            const fileBack = document.getElementById('imgBack').files[0];
+            const fileLeft = document.getElementById('imgLeft').files[0];
+            const fileRight = document.getElementById('imgRight').files[0];
+
+            if (!fileFront || !fileBack || !fileLeft || !fileRight) {
+                invokeToastAlert("All 4 multi-angle perspectives are mandatory.", "error");
+                return;
+            }
+
+            const loadAsset = (file) => new Promise((res) => {
+                const reader = new FileReader();
+                reader.onloadend = () => res(reader.result);
+                reader.readAsDataURL(file);
+            });
+
+            Promise.all([loadAsset(fileFront), loadAsset(fileBack), loadAsset(fileLeft), loadAsset(fileRight)])
+                .then(([bFront, bBack, bLeft, bRight]) => {
+                    const newEntry = {
+                        id: Date.now(),
+                        title: document.getElementById('pTitle').value,
+                        price: parseFloat(document.getElementById('pPrice').value),
+                        category: document.getElementById('pCategory').value,
+                        desc: document.getElementById('pDesc').value,
+                        images: { front: bFront, back: bBack, left: bLeft, right: bRight }
+                    };
+
+                    productsDatabase.unshift(newEntry);
+                    refreshStorefrontGrid();
+                    document.getElementById('productForm').reset();
+                    invokeToastAlert("Product processed and cataloged into decentralized storage pipeline.");
+                });
+        }
+
+        // DETAILED HIGHLIGHT VIEW SYSTEM ENGINE
+        function launchProductDetailView(id) {
+            currentlySelectedProduct = productsDatabase.find(p => p.id === id);
+            if (!currentlySelectedProduct) return;
+
+            document.getElementById('modal-pTitle').innerText = currentlySelectedProduct.title;
+            document.getElementById('modal-pCategory').innerText = currentlySelectedProduct.category;
+            document.getElementById('modal-pPrice').innerText = `Rs. ${currentlySelectedProduct.price.toLocaleString()}`;
+            document.getElementById('modal-pDesc').innerText = currentlySelectedProduct.desc;
+
+            // Mount multi-angle asset endpoints
+            document.getElementById('thumb-front').src = currentlySelectedProduct.images.front;
+            document.getElementById('thumb-back').src = currentlySelectedProduct.images.back;
+            document.getElementById('thumb-left').src = currentlySelectedProduct.images.left;
+            document.getElementById('thumb-right').src = currentlySelectedProduct.images.right;
+
+            updateModalViewerAngle('front');
+
+            const modal = document.getElementById('product-detail-modal');
+            const card = document.getElementById('detail-card');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => card.classList.remove('scale-95', 'opacity-0'), 10);
+        }
+
+        function closeProductDetailViewModal() {
+            // Internal wrapper for convenience
+            closeProductDetailModal();
+        }
+
+        function closeProductDetailModal() {
+            const modal = document.getElementById('product-detail-modal');
+            const card = document.getElementById('detail-card');
+            card.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 200);
+            document.getElementById('checkoutForm').reset();
+        }
+
+        function updateModalViewerAngle(angle) {
+            const viewer = document.getElementById('modal-main-viewer');
+            const badge = document.getElementById('angle-badge');
+            
+            viewer.src = currentlySelectedProduct.images[angle];
+            badge.innerText = `${angle} Perspective View`;
+
+            document.querySelectorAll('.angle-btn').forEach((btn, idx) => {
+                const targetIdx = ['front', 'back', 'left', 'right'].indexOf(angle);
+                if (idx === targetIdx) {
+                    btn.className = "angle-btn border-2 border-indigo-600 bg-slate-50 rounded-xl p-2 h-20 flex items-center justify-center overflow-hidden";
+                } else {
+                    btn.className = "angle-btn border border-slate-200 bg-slate-50 rounded-xl p-2 h-20 flex items-center justify-center overflow-hidden";
+                }
+            });
+        }
+
+        // CASH ON DELIVERY ORDER MANAGEMENT SYSTEM
+        function processProductOrder(e) {
+            e.preventDefault();
+            const orderPayload = {
+                id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+                productId: currentlySelectedProduct.id,
+                productTitle: currentlySelectedProduct.title,
+                customerName: document.getElementById('custName').value,
+                customerPhone: document.getElementById('custPhone').value,
+                customerAddress: document.getElementById('custAddress').value,
+                status: "Processing"
+            };
+
+            ordersDatabase.unshift(orderPayload);
+            refreshSellerPipeline();
+            closeProductDetailModal();
+            invokeToastAlert(`Order Verified via COD! Tracking Reference: ${orderPayload.id}`);
+        }
+
+        // SELLER ORDER PIPELINE AND DISPATCH CONTROL TERMINAL
+        function refreshSellerPipeline() {
+            const container = document.getElementById('seller-order-container');
+            container.innerHTML = '';
+
+            if (ordersDatabase.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 border border-dashed border-slate-200 rounded-xl">
+                        <i class="fa-solid fa-box-open text-3xl text-slate-300 mb-2"></i>
+                        <p class="text-slate-400 text-sm">No incoming orders present inside processing queues.</p>
+                    </div>`;
+                return;
+            }
+
+            ordersDatabase.forEach(order => {
+                const item = document.createElement('div');
+                item.className = "bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4";
+                
+                let selectStatusHTML = `
+                    <select onchange="updatePipelineStatus('${order.id}', this.value)" class="text-xs bg-white border border-slate-200 rounded-lg p-2 focus:outline-none focus:border-indigo-500 font-medium text-slate-700">
+                        <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                        <option value="Dispatched" ${order.status === 'Dispatched' ? 'selected' : ''}>Dispatched</option>
+                        <option value="In Transit" ${order.status === 'In Transit' ? 'selected' : ''}>In Transit</option>
+                        <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                    </select>
+                `;
+
+                item.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-sm text-slate-900">${order.id}</span>
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${getStatusStylingClass(order.status)}">${order.status}</span>
+                            </div>
+                            <p class="text-xs font-semibold text-indigo-600 line-clamp-1"><i class="fa-solid fa-cube"></i> ${order.productTitle}</p>
+                            <p class="text-[11px] text-slate-400"><i class="fa-solid fa-clock"></i> Live Matrix Sync Tracked</p>
+                        </div>
+                        <div class="text-xs space-y-0.5 border-l md:border-l border-slate-200 pl-0 md:pl-4">
+                            <p class="text-slate-900 font-bold"><i class="fa-solid fa-user text-slate-400 mr-1"></i> ${order.customerName}</p>
+                            <p class="text-slate-600"><i class="fa-solid fa-phone text-slate-400 mr-1"></i> ${order.customerPhone}</p>
+                            <p class="text-slate-500 line-clamp-1"><i class="fa-solid fa-location-dot text-slate-400 mr-1"></i> ${order.customerAddress}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
+                        <span class="text-xs font-bold text-slate-500 hidden md:inline">Modify Status:</span>
+                        ${selectStatusHTML}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function getStatusStylingClass(status) {
+            switch(status) {
+                case 'Processing': return 'bg-amber-50 text-amber-600 border border-amber-200';
+                case 'Dispatched': return 'bg-blue-50 text-blue-600 border border-blue-200';
+                case 'In Transit': return 'bg-indigo-50 text-indigo-600 border border-indigo-200';
+                case 'Delivered': return 'bg-emerald-50 text-emerald-600 border border-emerald-200';
+                default: return 'bg-slate-50 text-slate-600';
+            }
+        }
+
+        function updatePipelineStatus(orderId, newStatus) {
+            const target = ordersDatabase.find(o => o.id === orderId);
+            if (target) {
+                target.status = newStatus;
+                refreshSellerPipeline();
+                invokeToastAlert(`Tracking Reference ${orderId} status transitioned to [${newStatus}]`);
+            }
+        }
+
+        // ========================================== -->
+        // DUAL MATRIX INTER-PORTAL LIVE CHAT SYSTEM  -->
+        // ========================================== -->
+        let communicationsLog = [
+            { sender: 'seller', text: 'Hello! Welcome to the Merchant Support Network. Let us know if you have any questions.', time: 'System Initialization' }
+        ];
+
+        function toggleChatInterface() {
+            const win = document.getElementById('chat-window');
+            if (win.classList.contains('hidden')) {
+                win.classList.remove('hidden');
+                win.classList.add('flex');
+                initializeChatLogs();
+            } else {
+                win.classList.add('hidden');
+                win.classList.remove('flex');
+            }
+        }
+
+        function initializeChatLogs() {
+            const container = document.getElementById('chat-messages-container');
+            container.innerHTML = '';
+
+            communicationsLog.forEach(msg => {
+                const bubbleWrapper = document.createElement('div');
+                bubbleWrapper.className = `flex flex-col ${msg.sender === currentPortalMode ? 'items-end' : 'items-start'}`;
+                
+                let dynamicLabel = msg.sender === 'buyer' ? 'Customer Profile' : 'Verified Merchant';
+                let stylingClass = msg.sender === currentPortalMode 
+                    ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-none shadow-sm' 
+                    : 'bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-tl-none shadow-xs';
+
+                bubbleWrapper.innerHTML = `
+                    <span class="text-[9px] text-slate-400 font-bold px-1 mb-0.5">${dynamicLabel}</span>
+                    <div class="p-3 max-w-[85%] text-xs leading-relaxed ${stylingClass}">
+                        <p>${msg.text}</p>
+                    </div>
+                `;
+                container.appendChild(bubbleWrapper);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function broadcastMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInputField');
+            if (!input.value.trim()) return;
+
+            communicationsLog.push({
+                sender: currentPortalMode,
+                text: input.value.trim(),
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+
+            input.value = '';
+            initializeChatLogs();
+        }
+    </script>
+</body>
+</html>
